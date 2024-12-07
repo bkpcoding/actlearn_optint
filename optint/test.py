@@ -32,7 +32,9 @@ def test_active(problem, opts):
 		a = np.random.uniform(-1,1,(problem.nnodes,1))
 		a = a / np.linalg.norm(a)
 		
-		batch = problem.sample(a, opts.n)
+		# batch = problem.sample(a, opts.n)
+		batch = problem.sample(a, n=opts.n, intervention_noise_std=opts.noise_std)
+
 		model.update_posterior(a, batch)
 
 		A.append(a)
@@ -68,11 +70,13 @@ def test_active(problem, opts):
 			a_jitter = a.reshape(-1)*np.random.uniform(0.8,1.2,(problem.nnodes,))
 			x01 = np.maximum(np.minimum(a_jitter, 1), -1)
 
-			x02 = problem.mu_target - np.matmul(mean, problem.mu_target)
+			# Fix x02 to be 1D
+			x02 = problem.mu_target.flatten() - np.matmul(mean, problem.mu_target).flatten()  # Make sure it's 1D
 			x02 = x02 / np.linalg.norm(x02)
 
 			a1 = acquisition.optimize(x0=x01)
 			a2 = acquisition.optimize(x0=x02)
+			
 			if a1 is not None and a2 is not None:
 				a1 = a1.reshape(-1,1)
 				a2 = a2.reshape(-1,1)
@@ -85,6 +89,7 @@ def test_active(problem, opts):
 				print('1st initialization (last round) failed...')
 			else:
 				print('both initializations failed...')
+
 		except UnboundLocalError:
 			x0 = np.random.uniform(-1,1, problem.nnodes)
 			x0 = x0 / np.linalg.norm(x0)
@@ -94,7 +99,8 @@ def test_active(problem, opts):
 				a = np.random.uniform(-1,1, problem.nnodes).reshape(-1,1)
 				a = a / np.linalg.norm(a) 
 
-		batch = problem.sample(a, opts.n)
+		# batch = problem.sample(a, opts.n)
+		batch = problem.sample(a, n=10, intervention_noise_std=opts.noise_std)
 		model.update_posterior(a, batch)
 
 		if opts.acq == 'ei':

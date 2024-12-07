@@ -15,6 +15,7 @@ from optint.test import test_passive, test_active
 
 
 def run(problem, opts):
+	print(f"Opts: {opts}")
 
 	if opts.time:
 		start = timeit.default_timer()
@@ -52,6 +53,8 @@ if __name__ == '__main__':
 	parser.add_argument('--std', action='store_true', help='Standardize to make equal variance (store_true).')
 	parser.add_argument('--a_size', type=int, help='<Required> Number of intervention targets (int).', required=True)
 	parser.add_argument('--a_target', type=int, nargs='+', help='Intervention targets (ints).')
+	parser.add_argument('--time', action='store_true', help='Time the execution of algorithms')
+	parser.add_argument('--noise_std', type=int, default=0.0, help='Intervention noise (int)', required=False)
 
 	# learning method
 	parser.add_argument('--acquisition', type=str, nargs='+', help='Type of acquisition functions used for active learning (strs).')
@@ -87,7 +90,9 @@ if __name__ == '__main__':
 		W=args.warm_up_step, 
 		R=args.repeat_runs, 
 		known_noise=args.unknown_variance, 
-		measure=args.civ_measure
+		measure=args.civ_measure,
+		time=args.time,
+		noise_std=args.noise_std,
 		)
 	with open('{}/args.json'.format(savedir), 'w') as f:
 		json.dump(vars(opts), f, indent=True)

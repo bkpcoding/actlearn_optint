@@ -1,0 +1,9 @@
+{
+ "n": 1,
+ "T": 50,
+ "W": 0,
+ "R": 20,
+ "known_noise": true,
+ "measure": "unif",
+ "time": false
+}

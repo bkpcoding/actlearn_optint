@@ -58,12 +58,31 @@ class synthetic_instance(object):
 		# calculate target mean
 		self.mu_target = self.mu + np.matmul(self.A, self.a_target)
 
-	# get N samples from intervention a
-	def sample(self, a, n):
+	def sample(self, a, n, intervention_noise_std=0.0):
+		"""
+		Get N samples from intervention a with optional intervention noise
+		
+		Args:
+			a: Base intervention vector
+			n: Number of samples
+			intervention_noise_std: Standard deviation of Gaussian noise added to intervention
+		"""
+		# Add Gaussian noise to intervention if specified
+		if intervention_noise_std > 0:
+			# Generate noise for each sample independently
+			intervention_noise = np.random.normal(0, intervention_noise_std, size=(self.nnodes, n))
+			# Add noise to intervention vector for each sample
+			noisy_interventions = a + intervention_noise
+		else:
+			# Use original intervention for all samples if no noise
+			noisy_interventions = np.repeat(a, n, axis=1)
+
+		# Generate observation noise
 		eps = np.random.multivariate_normal(self.eps_means, self.eps_cov, n).reshape(self.nnodes, n)
-
-		batch = np.dot(self.A, a + eps)
-
+		
+		# Apply intervention and get samples
+		batch = np.dot(self.A, noisy_interventions + eps)
+		
 		return batch
 
 
